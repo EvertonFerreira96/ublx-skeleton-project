@@ -1,0 +1,12 @@
+{
+  "name": "ubxgenerators",
+  "displayName": "ubxgenerators",
+  "expo": {
+    "name": "ubxgenerators",
+    "slug": "ubxgenerators",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
