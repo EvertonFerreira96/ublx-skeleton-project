@@ -1,0 +1,1 @@
+export type IMaskTypeProps = "cpf" | "cnpj" |  "phone" | "cep";
