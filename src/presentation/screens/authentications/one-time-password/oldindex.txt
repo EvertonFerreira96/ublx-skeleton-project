@@ -1,0 +1,173 @@
+import { RemoteSendOneTimePasswordMessageByMail } from '@/data/services/-authentications/one-time-password';
+import { PrimaryTouchableBordelessFilledButton } from '@/presentation/components/actions/touchable-bordeless-button/primary/fillled-button';
+import { CountdownPrimaryButton } from '@/presentation/components/actions/countdown-primary-button';
+
+import { HeaderBackComponent } from '@/presentation/components/headers/back';
+
+import { TextInMiddleHorizontalLine } from '@/presentation/components/separators';
+import { useNavigation, useRoute } from '@react-navigation/core';
+import { Form } from '@unform/mobile';
+import React, { useState, useEffect, useRef } from 'react';
+import { Keyboard,KeyboardAvoidingView, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Platform } from 'react-native';
+
+import { HeaderContainer, SignInContainer } from './styles';
+// import { Container } from './styles';
+
+import { getBottomSpace, getStatusBarHeight } from 'react-native-iphone-x-helper';
+
+type ParamsProps = {
+  email?: string
+}
+
+export const OneTimePassword: React.FC = () => {
+  const {navigate} = useNavigation();
+  const {params} = useRoute();
+  const email = "ferreira.everton@icloud.com" // params as ParamsProps; 
+  const textInputRef = useRef<TextInput>(null);
+  const defaultCountdown = 900;
+  const [internalValue, setInternalValue] = useState("")
+  const [countdown, setCountdown] = useState(defaultCountdown)
+  const [enableResend, setEnableResend] = useState(false)
+  const lengthInput = 4;
+  let clockCall: NodeJS.Timeout; 
+
+  async function SendSmsMessage(email: string){
+  }
+
+  function onChangeText(text: string) {
+      setInternalValue(text)
+      const filterInternalValue = text.split('').filter(Boolean); 
+      if(filterInternalValue.length === lengthInput)
+        navigate("SignUp")
+  }
+
+  function decrementClock() {
+    if(countdown <= 1){
+      setEnableResend(true);
+      setCountdown(0);
+      clearInterval(clockCall)
+    }
+    else {
+      setCountdown(countdown -1); 
+    }
+  }
+
+  function onChangeNumber(){
+    setInternalValue("");
+  }
+
+
+  function onResendOTP(){
+    if(enableResend){
+      setCountdown(defaultCountdown); 
+      setEnableResend(false);
+      clearInterval(clockCall)
+      clockCall = setInterval(() => {
+        decrementClock();
+      },1000)
+    }
+
+  }
+
+
+  useEffect(() => {
+    clockCall = setInterval(() => {
+      decrementClock();
+    },1000)
+    return () => { 
+      clearInterval(clockCall)
+    }
+  } );
+
+  
+  return (
+    <View style={{ flex:1, marginTop: getStatusBarHeight() + 50 }}>
+          <KeyboardAvoidingView
+            behavior="position"
+            enabled
+            contentContainerStyle={{
+              height: '100%'
+            }}
+          >
+            <HeaderBackComponent />
+
+            <View style={{ flex:1, justifyContent: 'space-between', flexDirection: 'column'}}> 
+            <View style={{  flex: 1, justifyContent: 'center'
+                  , paddingHorizontal: 16   }}>
+
+
+<View>
+
+                <Text style={{fontSize: 23, lineHeight:33 , fontFamily: 'Inter-Regular' , color: '#333', textAlign: 'left'}}>
+                Digite o código de 4 dígitos que enviamos para o e-mail
+                <Text style={{color: '#333', fontFamily: 'Inter-SemiBold'}}> { email}</Text>              
+                </Text>
+</View>
+            </View>
+
+              <TouchableOpacity style={{justifyContent: 'center',   flex: 1   }} 
+              activeOpacity={1}
+              onPress={() => textInputRef.current?.focus()}>
+
+          <TextInput
+            ref={textInputRef}
+            onChangeText={onChangeText}
+            style={{ width: 0, height: 0 }}
+            value={internalValue}
+            maxLength={lengthInput}
+            returnKeyType="done"
+            keyboardType="numeric"
+            />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-around',
+            }}
+            >
+            {
+              Array(lengthInput).fill(null).map((data, index) => (
+                <View 
+                key={index}
+                
+                style={{ 
+                  margin:5
+                  , paddingVertical: 12
+                  , paddingHorizontal: 16 
+                  , minHeight: 12 + 20 + 35
+                  , minWidth: 16 + 20 + 35
+                  , justifyContent: 'center'
+                  , alignItems: 'center'
+                  , borderWidth: 1.5 
+                  , borderColor: index <= internalValue.length ? '#333333' : '#C3C3C3'
+                }}>
+                <Text
+                  style={{
+                    alignItems: 'center'
+                    , fontSize: 20
+                    , lineHeight:30
+                  }}
+                  >
+                  {internalValue && internalValue.length > 0 ? internalValue[index] : "" }
+                </Text>
+              </View>
+              ))
+            }
+          </View>
+            </TouchableOpacity>
+
+            <SignInContainer style={{flex:2, justifyContent: 'center'}}>
+            <PrimaryTouchableBordelessFilledButton title="Continuar" onPress={() => SendSmsMessage('')} />
+              <CountdownPrimaryButton  onPress={onResendOTP} enabled={enableResend}>
+              { `Reenviar Código  ${!enableResend ? ( new Date(new Date().setHours(0,0,countdown)).toISOString().substr(14, 5)) : '' }` }
+            </CountdownPrimaryButton>
+            </SignInContainer>
+            </View>
+
+          </KeyboardAvoidingView>
+            </View>
+  );
+
+  
+}
+
