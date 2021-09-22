@@ -6,6 +6,15 @@
     "web": "expo start --web",
     "start": "react-native start",
     "test": "jest"
+
+
+
+
+
+Adasdasdasd
+
+
+sdadasdasd
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.0",
